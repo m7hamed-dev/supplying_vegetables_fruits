@@ -3,6 +3,7 @@ import 'package:grocery_app/common_widgets/app_text.dart';
 import 'package:grocery_app/common_widgets/img_network.dart';
 import 'package:grocery_app/common_widgets/loading_widget.dart';
 import 'package:grocery_app/models/grocery_item.dart';
+import 'package:grocery_app/random_id.dart';
 import 'package:grocery_app/screens/product_details/product_details_screen.dart';
 import 'package:grocery_app/widgets/grocery_item_card_widget.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -92,38 +93,75 @@ class _ProductsPageState extends State<ProductsPage> {
                         horizontal: 15,
                         vertical: 15,
                       ),
-                      child: Column(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          ImgNetwork(imageUrl: e.value['img_path']),
-                          SizedBox(
-                            height: 20,
+                          ImgNetwork(
+                            imageUrl: e.value['img_path'],
                           ),
-                          AppText(
-                            text: e.value['product_name'],
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                          SizedBox(width: 10.0),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              AppText(
+                                text: e.value['product_name'],
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              AppText(
+                                text: e.value['product_name'],
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFF7C7C7C),
+                              ),
+                              SizedBox(
+                                height: 20,
+                              ),
+                              MaterialButton(
+                                color: Colors.green,
+                                onPressed: () {
+                                  // _isLoading = true;
+                                  setState(() {});
+                                  // Navigator.of(context).pop();
+                                  Map<String, dynamic> _map = {
+                                    'id': randomId,
+                                    'name': e.value['product_name'],
+                                    'img_path': e.value['img_path'],
+                                    'qty': '100',
+                                    'date_to_cart': '${DateTime.now()}',
+                                  };
+                                  db
+                                      .collection('cartCollection')
+                                      .doc(randomId)
+                                      .set(_map)
+                                      .then((value) {
+                                    setState(() {});
+                                  }).whenComplete(() {
+                                    setState(() {});
+                                  }).catchError((onError) {
+                                    debugPrint('onError = $onError');
+                                  });
+                                },
+                                child: Text(
+                                  'Add to Cart',
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              ),
+                              // Row(
+                              //   children: [
+                              //     AppText(
+                              //       text: "\$${item!.price!.toStringAsFixed(2)}",
+                              //       fontSize: 18,
+                              //       fontWeight: FontWeight.bold,
+                              //     ),
+                              //     Spacer(),
+                              //     // addWidget()
+                              //   ],
+                              // )
+                            ],
                           ),
-                          AppText(
-                            text: e.value['product_name'],
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF7C7C7C),
-                          ),
-                          SizedBox(
-                            height: 20,
-                          ),
-                          // Row(
-                          //   children: [
-                          //     AppText(
-                          //       text: "\$${item!.price!.toStringAsFixed(2)}",
-                          //       fontSize: 18,
-                          //       fontWeight: FontWeight.bold,
-                          //     ),
-                          //     Spacer(),
-                          //     // addWidget()
-                          //   ],
-                          // )
                         ],
                       ),
                     ),

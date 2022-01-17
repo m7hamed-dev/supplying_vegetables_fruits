@@ -18,7 +18,6 @@ class HomeScreen extends StatelessWidget {
                 HomeBanner(),
                 SizedBox(height: 40.0),
                 padded(subTitle("Categories")),
-                // getHorizontalItemSlider(exclusiveOffers),
                 CategoryItemsScreen(isShowScaffold: false),
               ],
             ),

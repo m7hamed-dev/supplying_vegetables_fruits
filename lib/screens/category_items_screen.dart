@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:grocery_app/common_widgets/app_text.dart';
 import 'package:grocery_app/common_widgets/loading_widget.dart';
-import 'package:grocery_app/models/grocery_item.dart';
-import 'package:grocery_app/screens/product_details/product_details_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:grocery_app/screens/product_details/products_page.dart';
 
@@ -150,8 +148,7 @@ class _CategoryItemsScreenState extends State<CategoryItemsScreen> {
                 ),
               );
             }).toList(),
-            // staggeredTiles:
-            //     beverages.map<StaggeredTile>((_) => StaggeredTile.fit(2)).toList(),
+
             mainAxisSpacing: 3.0,
             crossAxisSpacing: 0.0, // add some space
           );
@@ -164,7 +161,6 @@ class _CategoryItemsScreenState extends State<CategoryItemsScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        // builder: (context) => ProductDetailsScreen(
         builder: (context) => ProductsPage(
           isShowScaffold: true,
           productID: productID,
