@@ -70,6 +70,7 @@ class GroceryItemCardWidget extends StatelessWidget {
         ),
       ),
     );
+ 
   }
 
   Widget imageWidget() {

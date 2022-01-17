@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:grocery_app/common_widgets/app_text.dart';
+import 'package:grocery_app/common_widgets/img_network.dart';
 import 'package:grocery_app/common_widgets/loading_widget.dart';
 import 'package:grocery_app/models/grocery_item.dart';
 import 'package:grocery_app/screens/product_details/product_details_screen.dart';
 import 'package:grocery_app/widgets/grocery_item_card_widget.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class CartPage extends StatefulWidget {
-  const CartPage({
+class ProductsPage extends StatefulWidget {
+  const ProductsPage({
     Key? key,
     this.isShowScaffold,
     this.productID,
@@ -16,30 +17,24 @@ class CartPage extends StatefulWidget {
   final String? productID;
 
   @override
-  State<CartPage> createState() => _CartPageState();
+  State<ProductsPage> createState() => _ProductsPageState();
 }
 
-class _CartPageState extends State<CartPage> {
+class _ProductsPageState extends State<ProductsPage> {
   final db = FirebaseFirestore.instance;
 
   Stream<QuerySnapshot> _getProducts() {
-    // if (widget.productID != null) {
-    return db
-        .collection("productsCollection")
-        // .where('id', isEqualTo: widget.productID ?? 'JtgFjmprdjTRoz9K5Fex')
-        // .where('id', isEqualTo: widget.productID ?? 'JtgFjmprdjTRoz9K5Fex')
-        .snapshots();
-    // await db
-    //     .collection("productsCollection")
-    //     .where('id', isEqualTo: widget.productID ?? 'JtgFjmprdjTRoz9K5Fex')
-    //     .get()
-    //     .then((value) {
-    //   return value;
-    // });
-    // }
-    // return await db.collection("productsCollection").get().then((value) {
-    //   return value;
-    // });
+    debugPrint('widget.productID = ${widget.productID}');
+    if (widget.productID == null) {
+      return db.collection("productsCollection").snapshots();
+    }
+
+    return db.collection("productsCollection").snapshots().where((event) {
+      if (event.docs.length > 0) {
+        return true;
+      }
+      return false;
+    });
   }
 
   @override
@@ -69,55 +64,74 @@ class _CartPageState extends State<CartPage> {
               ),
             ),
           ),
-          actions: [
-            GestureDetector(
-              onTap: () {
-                // Navigator.push(
-                //   context,
-                //   MaterialPageRoute(builder: (context) => FilterScreen()),
-                // );
-              },
-              child: Container(
-                padding: EdgeInsets.only(right: 25),
-                child: Icon(
-                  Icons.sort,
-                  color: Colors.black,
-                ),
-              ),
-            ),
-          ],
-          title: Container(
-            padding: EdgeInsets.symmetric(
-              horizontal: 25,
-            ),
-            child: AppText(
-              text: "Beverages",
-              fontWeight: FontWeight.bold,
-              fontSize: 20,
-            ),
+          title: AppText(
+            text: "Products Page",
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
           ),
         ),
-        body: GridView.count(
-          crossAxisCount: 4,
-          // I only need two card horizontally
-          children: beverages.asMap().entries.map<Widget>((e) {
-            GroceryItem groceryItem = e.value;
-            return GestureDetector(
-              onTap: () {
-                onItemClicked(context, groceryItem);
-              },
-              child: Container(
-                padding: EdgeInsets.all(10),
-                child: GroceryItemCardWidget(
-                  item: groceryItem,
-                ),
-              ),
-            );
-          }).toList(),
-          // staggeredTiles:
-          //     beverages.map<StaggeredTile>((_) => StaggeredTile.fit(2)).toList(),
-          mainAxisSpacing: 3.0,
-          crossAxisSpacing: 0.0, // add some space
+        body: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: StreamBuilder<QuerySnapshot>(
+            stream: _getProducts(),
+            builder:
+                (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+              if (!snapshot.hasData) {
+                return LoadingWidget();
+              }
+              final _data = snapshot.data!.docs;
+              return ListView(
+                children: _data.asMap().entries.map<Widget>((e) {
+                  return Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.green),
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 15,
+                        vertical: 15,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          ImgNetwork(imageUrl: e.value['img_path']),
+                          SizedBox(
+                            height: 20,
+                          ),
+                          AppText(
+                            text: e.value['product_name'],
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          AppText(
+                            text: e.value['product_name'],
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF7C7C7C),
+                          ),
+                          SizedBox(
+                            height: 20,
+                          ),
+                          // Row(
+                          //   children: [
+                          //     AppText(
+                          //       text: "\$${item!.price!.toStringAsFixed(2)}",
+                          //       fontSize: 18,
+                          //       fontWeight: FontWeight.bold,
+                          //     ),
+                          //     Spacer(),
+                          //     // addWidget()
+                          //   ],
+                          // )
+                        ],
+                      ),
+                    ),
+                  );
+                }).toList(),
+              );
+            },
+          ),
         ),
       );
     }
