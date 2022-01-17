@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:grocery_app/common_widgets/app_text.dart';
-import 'package:grocery_app/styles/colors.dart';
 import 'package:grocery_app/widgets/search_bar_widget.dart';
 
 class HomeBanner extends StatelessWidget {

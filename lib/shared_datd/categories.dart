@@ -1,3 +1,4 @@
+//
 final allCategories = [
   Category(
     name: "Dite Coke",
