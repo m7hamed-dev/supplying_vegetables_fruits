@@ -73,11 +73,11 @@ class _CartPageState extends State<CartPage> {
                   final _data = snapshot.data!.docs;
                   _list = _data;
                   debugPrint('_list = ${_list.length}');
-                  if (_list.isEmpty) {
+                  if (_data.isEmpty) {
                     return Center(child: Text('no product on your cart !!'));
                   }
                   return ListView(
-                    children: _list.asMap().entries.map<Widget>((e) {
+                    children: _data.asMap().entries.map<Widget>((e) {
                       return Stack(
                         children: [
                           // content cart
@@ -154,7 +154,15 @@ class _CartPageState extends State<CartPage> {
                             child: IconButton(
                               color: Colors.green,
                               onPressed: () {
-                                _list.remove(0);
+                                db
+                                    .collection('cartCollection')
+                                    .doc(e.value.id)
+                                    .delete()
+                                    .then((value) {
+                                  debugPrint('value');
+                                }).catchError((onError) {
+                                  debugPrint('onError = $onError');
+                                });
                               },
                               icon: Icon(
                                 Icons.remove_circle_outline_outlined,

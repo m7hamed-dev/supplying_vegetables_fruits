@@ -26,7 +26,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       theme: themeData,
       home: _firebaseAuth.currentUser == null
-          ? SignInAndSignUpPage()
+          ? AccountPage()
           : role == 'user'
               ? DashboardScreen()
               : DashboardDdminPage(),

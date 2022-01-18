@@ -37,7 +37,7 @@ class DashboardDdminPage extends StatelessWidget {
               Icons.logout,
               onTap: () async {
                 await _firebaseAuth.signOut();
-                Push.to(context, const SignInAndSignUpPage());
+                Push.to(context, const AccountPage());
               },
             ),
             const SizedBox(height: 20.0),
