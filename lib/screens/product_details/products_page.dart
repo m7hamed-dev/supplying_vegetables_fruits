@@ -129,7 +129,8 @@ class _ProductsPageState extends State<ProductsPage> {
                                     'id': randomId,
                                     'name': e.value['product_name'],
                                     'img_path': e.value['img_path'],
-                                    'qty': '100',
+                                    // when add product to cart init qty equal one
+                                    'qty': '1',
                                     'date_to_cart': '${DateTime.now()}',
                                   };
                                   db

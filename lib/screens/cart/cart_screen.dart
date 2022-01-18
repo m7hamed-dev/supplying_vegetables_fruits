@@ -19,17 +19,18 @@ class CartPage extends StatefulWidget {
 class _CartPageState extends State<CartPage> {
   final db = FirebaseFirestore.instance;
 
-  Stream<QuerySnapshot> _getProducts() {
-    return db.collection("productsCollection").snapshots();
+  Stream<QuerySnapshot> _getProductsCart() {
+    return db.collection("cartCollection").snapshots();
   }
 
   @override
   void initState() {
     super.initState();
-    _getProducts();
+    _getProductsCart();
   }
 
   int qty = 1;
+  List<QueryDocumentSnapshot<Object?>> _list = [];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -51,123 +52,157 @@ class _CartPageState extends State<CartPage> {
           ),
         ),
         title: AppText(
-          text: "Products Page",
+          text: "Cart Page",
           fontWeight: FontWeight.bold,
           fontSize: 20,
         ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: StreamBuilder<QuerySnapshot>(
-          stream: _getProducts(),
-          builder:
-              (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-            if (!snapshot.hasData) {
-              return LoadingWidget();
-            }
-            final _data = snapshot.data!.docs;
-            return ListView(
-              children: _data.asMap().entries.map<Widget>((e) {
-                return Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.green),
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 15,
-                      vertical: 15,
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        ImgNetwork(
-                          imageUrl: e.value['img_path'],
-                        ),
-                        SizedBox(width: 10.0),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            AppText(
-                              text: e.value['product_name'],
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
+        child: Column(
+          children: [
+            Expanded(
+              child: StreamBuilder<QuerySnapshot>(
+                stream: _getProductsCart(),
+                builder: (BuildContext context,
+                    AsyncSnapshot<QuerySnapshot> snapshot) {
+                  if (!snapshot.hasData) {
+                    return LoadingWidget();
+                  }
+
+                  final _data = snapshot.data!.docs;
+                  _list = _data;
+                  debugPrint('_list = ${_list.length}');
+                  if (_list.isEmpty) {
+                    return Center(child: Text('no product on your cart !!'));
+                  }
+                  return ListView(
+                    children: _list.asMap().entries.map<Widget>((e) {
+                      return Stack(
+                        children: [
+                          // content cart
+                          Container(
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.green),
+                              borderRadius: BorderRadius.circular(10.0),
                             ),
-                            AppText(
-                              text: e.value['product_name'],
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: Color(0xFF7C7C7C),
-                            ),
-                            SizedBox(
-                              height: 20,
-                            ),
-                            MaterialButton(
-                              color: Colors.green,
-                              onPressed: () {
-                                // _isLoading = true;
-                                setState(() {});
-                                // Navigator.of(context).pop();
-                                Map<String, dynamic> _map = {
-                                  'id': randomId,
-                                  'name': e.value['product_name'],
-                                  'img_path': e.value['img_path'],
-                                  'qty': '$qty',
-                                  'date_to_cart': '${DateTime.now()}',
-                                };
-                                db
-                                    .collection('cartCollection')
-                                    .doc(randomId)
-                                    .set(_map)
-                                    .then((value) {
-                                  setState(() {});
-                                }).whenComplete(() {
-                                  setState(() {});
-                                }).catchError((onError) {
-                                  debugPrint('onError = $onError');
-                                });
-                              },
-                              child: Text(
-                                'Add to Cart',
-                                style: TextStyle(color: Colors.white),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 15,
+                                vertical: 15,
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  ImgNetwork(
+                                    imageUrl: e.value['img_path'],
+                                  ),
+                                  SizedBox(width: 10.0),
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: [
+                                      AppText(
+                                        text: e.value['name'],
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                      AppText(
+                                        text: e.value['qty'],
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                        color: Color(0xFF7C7C7C),
+                                      ),
+                                      Row(
+                                        children: [
+                                          IconButton(
+                                            color: Colors.green,
+                                            onPressed: () {
+                                              if (qty > 0) {
+                                                qty = int.parse(e.value['qty']);
+                                                qty++;
+                                                setState(() {});
+                                              }
+                                            },
+                                            icon: Icon(Icons.minimize),
+                                          ),
+                                          Text(
+                                            '$qty',
+                                            style:
+                                                TextStyle(color: Colors.black),
+                                          ),
+                                          IconButton(
+                                              color: Colors.green,
+                                              onPressed: () {
+                                                qty++;
+                                                setState(() {});
+                                              },
+                                              icon: Icon(Icons.add)),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ],
                               ),
                             ),
-                            Row(
-                              children: [
-                                IconButton(
-                                  color: Colors.green,
-                                  onPressed: () {
-                                    if (qty > 0) {
-                                      qty--;
-                                    }
-                                    setState(() {});
-                                  },
-                                  icon: Icon(Icons.minimize),
-                                ),
-                                Text(
-                                  '$qty',
-                                  style: TextStyle(color: Colors.black),
-                                ),
-                                IconButton(
-                                    color: Colors.green,
-                                    onPressed: () {
-                                      qty++;
-                                      setState(() {});
-                                    },
-                                    icon: Icon(Icons.add)),
-                              ],
+                          ),
+                          Positioned(
+                            top: 10,
+                            right: 10.0,
+                            child: IconButton(
+                              color: Colors.green,
+                              onPressed: () {
+                                _list.remove(0);
+                              },
+                              icon: Icon(
+                                Icons.remove_circle_outline_outlined,
+                                color: Colors.red,
+                              ),
                             ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              }).toList(),
-            );
-          },
+                          ),
+                        ],
+                      );
+                    }).toList(),
+                  );
+                },
+              ),
+            ),
+            MaterialButton(
+              color: Colors.green,
+              onPressed: () {
+                // _isLoading = true;
+                // setState(() {});
+                // Navigator.of(context).pop();
+
+                for (var item in _list) {
+                  Map<String, dynamic> _map = {
+                    'id': randomId,
+                    'name': item.get('name'),
+                    'img_path': item.get('img_path'),
+                    'qty': item.get('qty'),
+                    'date_to_cart': '${DateTime.now()}',
+                  };
+                  db
+                      .collection('orderCollection')
+                      .doc(randomId)
+                      .set(_map)
+                      .then((value) {
+                    // setState(() {});
+                  }).whenComplete(() {
+                    // setState(() {});
+                  }).catchError((onError) {
+                    debugPrint('onError = $onError');
+                  });
+                }
+              },
+              child: Text(
+                'finish order',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+          ],
         ),
       ),
     );
