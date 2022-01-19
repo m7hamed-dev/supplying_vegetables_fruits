@@ -88,24 +88,4 @@ class HomeScreen extends StatelessWidget {
       ],
     );
   }
-
-  // Widget locationWidget() {
-  //   String locationIconPath = "assets/icons/location_icon.svg";
-  //   return Row(
-  //     mainAxisAlignment: MainAxisAlignment.center,
-  //     children: [
-  //       SvgPicture.asset(
-  //         locationIconPath,
-  //       ),
-  //       SizedBox(
-  //         width: 8,
-  //       ),
-  //       Text(
-  //         "Khartoum,Sudan",
-  //         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-  //       )
-  //     ],
-  //   );
-  // }
-
 }

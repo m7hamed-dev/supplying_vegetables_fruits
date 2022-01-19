@@ -1,8 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:grocery_app/common_widgets/app_text.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:grocery_app/helpers/push.dart';
+import 'package:grocery_app/helpers/toasts/toast.dart';
 import 'package:grocery_app/local_storage/local_storage.dart';
 import 'package:grocery_app/screens/admin/dashboard_admin_page/dashboard_admin_page.dart';
 import 'package:grocery_app/screens/dashboard/dashboard_screen.dart';
@@ -20,13 +22,11 @@ class _LoginPageState extends State<LoginPage> {
   TextEditingController _emailController = TextEditingController();
   TextEditingController _passwordController = TextEditingController();
   //
-  //
-  Map<String, dynamic> _map = Map<String, dynamic>();
-  bool _isLoading = false;
+
   FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   //
   final _formKey = GlobalKey<FormState>();
-  String _role = 'user';
+  String _role = '';
 
   ///
   @override
@@ -103,36 +103,42 @@ class _LoginPageState extends State<LoginPage> {
                         },
                       ),
                     ),
-                    _isLoading
-                        ? Center(
-                            child: Text(
-                            "Add _categoryNameController Success ",
-                            style: TextStyle(color: Colors.green),
-                          ))
-                        : MaterialButton(
-                            color: Colors.green,
-                            onPressed: () {
-                              //
-                              final _firebaseAuth = FirebaseAuth.instance;
-                              _firebaseAuth.signInWithEmailAndPassword(
-                                email: _emailController.text.trim(),
-                                password: _passwordController.text.trim(),
-                              );
-                              if (_firebaseAuth.currentUser != null) {
-                                debugPrint('login success !!');
-                                Push.to(
-                                    context,
-                                    _role == 'user'
-                                        ? DashboardScreen()
-                                        : DashboardDdminPage());
-                                debugPrint('login error !!');
-                              }
-                            },
-                            child: Text(
-                              'Login',
-                              style: TextStyle(color: Colors.white),
-                            ),
-                          ),
+                    MaterialButton(
+                      color: Colors.green,
+                      onPressed: () {
+                        if (_role.isEmpty) {
+                          EasyLoading.showError('Select Your Role');
+                          return;
+                        }
+                        EasyLoading.showProgress(0.3, status: 'loading...');
+                        //
+                        final _firebaseAuth = FirebaseAuth.instance;
+                        _firebaseAuth
+                            .signInWithEmailAndPassword(
+                          email: _emailController.text.trim(),
+                          password: _passwordController.text.trim(),
+                        )
+                            .catchError((onError) {
+                          Future.error(onError);
+                        });
+                        //
+                        if (_firebaseAuth.currentUser != null) {
+                          Toast.success();
+                          debugPrint('_role = $_role');
+                          Push.to(
+                              context,
+                              _role == 'user'
+                                  ? DashboardScreen()
+                                  : DashboardDdminPage());
+                        } else {
+                          EasyLoading.showError('Login Failed with Error');
+                        }
+                      },
+                      child: Text(
+                        'Login',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
                   ],
                 ),
               ),

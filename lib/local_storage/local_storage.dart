@@ -16,5 +16,13 @@ class LocalStorage {
 
   static String getRolePrfs() => prefs.getString('roleKey') ?? '';
 
-  ///
+  // user info
+  static void setUserInfoPrfs(Map map) {
+    prefs.setString('emailKey', map['email']);
+    prefs.setString('numberKey', map['number_comercial']);
+    prefs.setString('phoneKey', map['phone']);
+    prefs.setString('roleKey', map['role']);
+  }
+
+  static String get getEmail => prefs.getString('emailKey') ?? '';
 }

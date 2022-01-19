@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:grocery_app/common_widgets/app_text.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:grocery_app/common_widgets/input.dart';
 import 'package:grocery_app/common_widgets/loading_widget.dart';
+import 'package:grocery_app/helpers/toasts/toast.dart';
 import 'package:grocery_app/random_id.dart';
 
 class AddProductsPage extends StatefulWidget {
@@ -15,10 +17,10 @@ class AddProductsPage extends StatefulWidget {
 class _AddProductsPageState extends State<AddProductsPage> {
   final db = FirebaseFirestore.instance;
 
+  TextEditingController _productDescriptionController = TextEditingController();
   TextEditingController _productNameController = TextEditingController();
   TextEditingController _pricetController = TextEditingController();
   Map<String, dynamic> _map = Map<String, dynamic>();
-  bool _isLoading = false;
   //
   Stream<QuerySnapshot> _getCategoriesName() {
     return db.collection("categoriesCollection").snapshots();
@@ -61,7 +63,6 @@ class _AddProductsPageState extends State<AddProductsPage> {
         padding: const EdgeInsets.all(15.0),
         child: ListView(
           children: [
-            Text('load image'),
             Container(
               child: StreamBuilder<QuerySnapshot>(
                 stream: _getCategoriesName(),
@@ -89,49 +90,55 @@ class _AddProductsPageState extends State<AddProductsPage> {
                 },
               ),
             ),
-            TextFormField(
+            const SizedBox(height: 30.0),
+            Input(
               controller: _productNameController,
+              hintText: 'product name',
             ),
-            TextFormField(
+            const SizedBox(height: 10.0),
+            Input(
               controller: _pricetController,
+              hintText: 'product price',
+              isNumberKeyBoard: true,
             ),
-            _isLoading
-                ? Center(
-                    child: Text(
-                    "Add Product Success ",
-                    style: TextStyle(color: Colors.green),
-                  ))
-                : MaterialButton(
-                    onPressed: () {
-                      _isLoading = true;
-                      setState(() {});
-                      // Navigator.of(context).pop();
-                      _map = {
-                        'product_id': randomId,
-                        'product_price': _pricetController.text,
-                        'product_name': _productNameController.text,
-                        'img_path':
-                            'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRXnGnYZMb2sJhJ1tlcUsA6VRfZM3NtdKMeig&usqp=CAU'
-                      };
-                      db
-                          .collection('productsCollection')
-                          .doc(randomId)
-                          .set(_map)
-                          .then((value) {
-                        _isLoading = false;
-                        setState(() {});
-                      }).whenComplete(() {
-                        _isLoading = false;
-                        setState(() {});
-                      }).catchError((onError) {
-                        debugPrint('onError = $onError');
-                      });
-                    },
-                    child: Text(
-                      "Add Product",
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
+            const SizedBox(height: 10.0),
+            Input(
+              controller: _productDescriptionController,
+              hintText: 'product description',
+            ),
+            const SizedBox(height: 10.0),
+            MaterialButton(
+              color: Colors.green,
+              onPressed: () {
+                if (catName.isEmpty) {
+                  Toast.error(error: 'select category for product');
+                  return;
+                }
+                _map = {
+                  'product_id': randomId,
+                  'cat_id': catName,
+                  'product_name': _productNameController.text,
+                  'product_description': _productDescriptionController.text,
+                  'product_price': _pricetController.text,
+                  'img_path':
+                      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRXnGnYZMb2sJhJ1tlcUsA6VRfZM3NtdKMeig&usqp=CAU'
+                };
+                db
+                    .collection('productsCollection')
+                    .doc(randomId)
+                    .set(_map)
+                    .then((value) {
+                  Toast.success();
+                }).catchError((onError) {
+                  Toast.error(error: onError.toString());
+                  debugPrint('onError = $onError');
+                });
+              },
+              child: Text(
+                "Add Product",
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
           ],
         ),
       ),

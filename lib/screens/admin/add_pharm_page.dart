@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:grocery_app/common_widgets/app_text.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:grocery_app/random_id.dart';
+import 'package:grocery_app/screens/admin/manager_pharm_page.dart';
 
 class AddPharmPage extends StatefulWidget {
   const AddPharmPage({Key? key}) : super(key: key);
@@ -12,7 +12,10 @@ class AddPharmPage extends StatefulWidget {
 
 class _AddPharmPageState extends State<AddPharmPage>
     with SingleTickerProviderStateMixin {
+  ///
   late TabController _tabController;
+
+  ///
   @override
   void initState() {
     _tabController = new TabController(length: 2, vsync: this);
@@ -30,10 +33,8 @@ class _AddPharmPageState extends State<AddPharmPage>
 
   ///
   Map<String, dynamic> _map = Map<String, dynamic>();
-  bool _isLoading = false;
   //
 
-  final _tabs = [];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -109,56 +110,46 @@ class _AddPharmPageState extends State<AddPharmPage>
                             filled: true,
                           ),
                         ),
-                        _isLoading
-                            ? Center(
-                                child: Text(
-                                "Add _categoryNameController Success ",
-                                style: TextStyle(color: Colors.green),
-                              ))
-                            : Column(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: [
-                                  MaterialButton(
-                                    color: Colors.green,
-                                    onPressed: () {
-                                      _isLoading = true;
-                                      setState(() {});
-                                      // Navigator.of(context).pop();
-                                      _map = {
-                                        'pharm_id': randomId,
-                                        'name': _nameController.text,
-                                        'number_comercial':
-                                            _numberCommercialController.text,
-                                        'location': _locationController.text,
-                                        'phone': _phoneController.text,
-                                        'admin': _addminController.text,
-                                      };
-                                      db
-                                          .collection('pharmCollection')
-                                          .doc(randomId)
-                                          .set(_map)
-                                          .then((value) {
-                                        _isLoading = false;
-                                        setState(() {});
-                                      }).whenComplete(() {
-                                        _isLoading = false;
-                                        setState(() {});
-                                      }).catchError((onError) {
-                                        debugPrint('onError = $onError');
-                                      });
-                                    },
-                                    child: Text(
-                                      'add new pharm',
-                                      style: TextStyle(color: Colors.white),
-                                    ),
-                                  ),
-                                ],
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            MaterialButton(
+                              color: Colors.green,
+                              onPressed: () {
+                                _map = {
+                                  'pharm_id': randomId,
+                                  'name': _nameController.text,
+                                  'number_comercial':
+                                      _numberCommercialController.text,
+                                  'location': _locationController.text,
+                                  'phone': _phoneController.text,
+                                  'woner_admin': _addminController.text,
+                                };
+                                db
+                                    .collection('pharmCollection')
+                                    .doc(randomId)
+                                    .set(_map)
+                                    .then((value) {})
+                                    .whenComplete(() {})
+                                    .catchError((onError) {
+                                  debugPrint('onError = $onError');
+                                });
+                              },
+                              child: Text(
+                                'add new pharm',
+                                style: TextStyle(color: Colors.white),
                               ),
+                            ),
+                          ],
+                        ),
                       ],
                     ),
                   ),
-                  // tab 2
-                  Container(color: Colors.red.shade100)
+
+                  /// tab 2
+                  Container(
+                    child: const ManagerPhramPage(),
+                  )
                 ],
                 controller: _tabController,
               ),

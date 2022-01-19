@@ -2,20 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:grocery_app/common_widgets/app_text.dart';
 import 'package:grocery_app/common_widgets/img_network.dart';
 import 'package:grocery_app/common_widgets/loading_widget.dart';
-import 'package:grocery_app/models/grocery_item.dart';
+import 'package:grocery_app/common_widgets/rounded_widget.dart';
 import 'package:grocery_app/random_id.dart';
-import 'package:grocery_app/screens/product_details/product_details_screen.dart';
-import 'package:grocery_app/widgets/grocery_item_card_widget.dart';
+import 'package:grocery_app/screens/cart/cart_provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:provider/src/provider.dart';
 
 class ProductsPage extends StatefulWidget {
-  const ProductsPage({
+  ProductsPage({
     Key? key,
     this.isShowScaffold,
-    this.productID,
+    this.categoryID,
   }) : super(key: key);
   final bool? isShowScaffold;
-  final String? productID;
+  String? categoryID;
 
   @override
   State<ProductsPage> createState() => _ProductsPageState();
@@ -25,55 +25,53 @@ class _ProductsPageState extends State<ProductsPage> {
   final db = FirebaseFirestore.instance;
 
   Stream<QuerySnapshot> _getProducts() {
-    debugPrint('widget.productID = ${widget.productID}');
-    if (widget.productID == null) {
-      return db.collection("productsCollection").snapshots();
+    if (widget.categoryID != null) {
+      return db
+          .collection("productsCollection")
+          .where('cat_id', isEqualTo: widget.categoryID)
+          .snapshots();
     }
-
-    return db.collection("productsCollection").snapshots().where((event) {
-      if (event.docs.length > 0) {
-        return true;
-      }
-      return false;
-    });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _getProducts();
+    // when you need to showing all products without filltering
+    return db.collection("productsCollection").snapshots();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (widget.isShowScaffold == true) {
-      return Scaffold(
-        appBar: AppBar(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          centerTitle: true,
-          automaticallyImplyLeading: false,
-          leading: GestureDetector(
-            onTap: () {
-              Navigator.pop(context);
-            },
-            child: Container(
-              padding: EdgeInsets.only(left: 25),
-              child: Icon(
-                Icons.arrow_back_ios,
-                color: Colors.black,
-              ),
+    final _cartProvider = context.read<CartProvider>();
+
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: true,
+        automaticallyImplyLeading: false,
+        leading: GestureDetector(
+          onTap: () {
+            Navigator.pop(context);
+          },
+          child: Container(
+            padding: EdgeInsets.only(left: 25),
+            child: Icon(
+              Icons.arrow_back_ios,
+              color: Colors.black,
             ),
           ),
-          title: AppText(
-            text: "Products Page",
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
-          ),
         ),
-        body: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: StreamBuilder<QuerySnapshot>(
+        title: AppText(
+          text: "Products Page",
+          fontWeight: FontWeight.bold,
+          fontSize: 20,
+        ),
+      ),
+      body: ListView(
+        children: [
+          _headerRow(),
+          const SizedBox(height: 10.0),
+          Divider(
+            color: Colors.grey.shade200,
+            thickness: 4.0,
+          ),
+          StreamBuilder<QuerySnapshot>(
             stream: _getProducts(),
             builder:
                 (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
@@ -81,173 +79,95 @@ class _ProductsPageState extends State<ProductsPage> {
                 return LoadingWidget();
               }
               final _data = snapshot.data!.docs;
-              return ListView(
-                children: _data.asMap().entries.map<Widget>((e) {
-                  return Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.green),
-                      borderRadius: BorderRadius.circular(10.0),
+              //
+              return ListView.separated(
+                itemCount: _data.length,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemBuilder: (BuildContext context, int index) {
+                  return ListTile(
+                    title: AppText(
+                      text: _data[index]['product_name'],
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 15,
-                        vertical: 15,
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          ImgNetwork(
-                            imageUrl: e.value['img_path'],
-                          ),
-                          SizedBox(width: 10.0),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              AppText(
-                                text: e.value['product_name'],
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                              AppText(
-                                text: e.value['product_name'],
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: Color(0xFF7C7C7C),
-                              ),
-                              SizedBox(
-                                height: 20,
-                              ),
-                              MaterialButton(
-                                color: Colors.green,
-                                onPressed: () {
-                                  // _isLoading = true;
-                                  setState(() {});
-                                  // Navigator.of(context).pop();
-                                  Map<String, dynamic> _map = {
-                                    'id': randomId,
-                                    'name': e.value['product_name'],
-                                    'img_path': e.value['img_path'],
-                                    // when add product to cart init qty equal one
-                                    'qty': '1',
-                                    'date_to_cart': '${DateTime.now()}',
-                                  };
-                                  db
-                                      .collection('cartCollection')
-                                      .doc(randomId)
-                                      .set(_map)
-                                      .then((value) {
-                                    setState(() {});
-                                  }).whenComplete(() {
-                                    setState(() {});
-                                  }).catchError((onError) {
-                                    debugPrint('onError = $onError');
-                                  });
-                                },
-                                child: Text(
-                                  'Add to Cart',
-                                  style: TextStyle(color: Colors.white),
-                                ),
-                              ),
-                              // Row(
-                              //   children: [
-                              //     AppText(
-                              //       text: "\$${item!.price!.toStringAsFixed(2)}",
-                              //       fontSize: 18,
-                              //       fontWeight: FontWeight.bold,
-                              //     ),
-                              //     Spacer(),
-                              //     // addWidget()
-                              //   ],
-                              // )
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                }).toList(),
-              );
-            },
-          ),
-        ),
-      );
-    }
-
-    return Container(
-      height: 100,
-      color: Colors.red.shade100,
-      child: StreamBuilder<QuerySnapshot>(
-        stream: _getProducts(),
-        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-          if (!snapshot.hasData) return LoadingWidget();
-          final _data = snapshot.data!.docs;
-          return ListView(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            children: _data.map((e) {
-              // return Text(e['product_id']);
-              return Container(
-                height: 140.0,
-                clipBehavior: Clip.antiAlias,
-                margin: const EdgeInsets.all(10.0),
-                decoration: BoxDecoration(
-                  color: Colors.teal,
-                  borderRadius: BorderRadius.circular(10.0),
-                ),
-                child: Row(
-                  children: [
-                    Image.network(
-                      e['img_path'],
-                      fit: BoxFit.cover,
-                    ),
-                    const SizedBox(width: 10.0),
-                    Column(
+                    subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         AppText(
-                          text: e['product_name'],
-                          fontSize: 12.0,
-                          fontWeight: FontWeight.bold,
+                          text: _data[index]['product_price'] + ' \R.S',
+                          fontSize: 18,
+                          color: Colors.green,
                         ),
                         AppText(
-                          text: e['product_price'],
-                          fontSize: 12.0,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        AppText(
-                          text: e['product_price'],
-                          fontSize: 12.0,
-                          fontWeight: FontWeight.bold,
+                          text: _data[index]['product_description'] + ' \R.S',
+                          fontSize: 14,
+                          color: Colors.grey,
                         ),
                       ],
                     ),
-                    // const Spacer(),
-                    // InkWell(
-                    //   onTap: () {},
-                    //   child: AppText(
-                    //     text: 'Add To Cart',
-                    //     fontSize: 12.0,
-                    //   ),
-                    // ),
-                  ],
+                    leading: ImgNetwork(
+                      imageUrl: _data[index]['img_path'],
+                    ),
+                    trailing: MaterialButton(
+                      color: Colors.green,
+                      onPressed: () {
+                        _cartProvider.addProtductToCart(_data[index]);
+                        return;
+                        Map<String, dynamic> _map = {
+                          'id': randomId,
+                          'name': _data[index]['product_name'],
+                          'img_path': _data[index]['img_path'],
+                          // when add product to cart init qty equal one
+                          'qty': '1',
+                          'date_to_cart': '${DateTime.now()}',
+                        };
+                        db
+                            .collection('cartCollection')
+                            .doc(randomId)
+                            .set(_map)
+                            .then((value) {})
+                            .whenComplete(() {})
+                            .catchError((onError) {
+                          debugPrint('onError = $onError');
+                        });
+                      },
+                      child: Text(
+                        'Add to Cart',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  );
+                },
+                separatorBuilder: (context, index) => Divider(
+                  color: Colors.grey.shade200,
+                  thickness: 4.0,
                 ),
               );
-            }).toList(),
-          );
-        },
+            },
+          ),
+        ],
       ),
     );
   }
 
-  void onItemClicked(BuildContext context, GroceryItem groceryItem) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ProductDetailsScreen(
-          groceryItem,
-        ),
+  Padding _headerRow() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(widget.categoryID ?? ''),
+          InkWell(
+            onTap: () {
+              widget.categoryID = null;
+              setState(() {});
+            },
+            child: RoundedWidget(
+              child: Text('Browse ALL '),
+            ),
+          )
+        ],
       ),
     );
   }

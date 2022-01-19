@@ -25,6 +25,7 @@ class AppText extends StatelessWidget {
         fontSize: fontSize,
         fontWeight: fontWeight,
         color: color,
+        fontFamily: 'Gilroy-Bold',
       ),
     );
   }

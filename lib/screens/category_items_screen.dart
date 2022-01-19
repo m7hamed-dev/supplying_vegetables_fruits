@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:grocery_app/common_widgets/app_text.dart';
+import 'package:grocery_app/common_widgets/empty_widget.dart';
+import 'package:grocery_app/common_widgets/img_network.dart';
 import 'package:grocery_app/common_widgets/loading_widget.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:grocery_app/screens/product_details/products_page.dart';
@@ -16,18 +18,14 @@ class _CategoryItemsScreenState extends State<CategoryItemsScreen> {
   final db = FirebaseFirestore.instance;
 
   Stream<QuerySnapshot> _getCategories() {
-    return db.collection("categoriesCollection").snapshots();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _getCategories();
+    return db
+        .collection("categoriesCollection")
+        // .where('cat_name', isEqualTo: 'cat 3')
+        .snapshots();
   }
 
   @override
   Widget build(BuildContext context) {
-    _getCategories();
     // if (widget.isShowScaffold == true) {
     //   return Scaffold(
     //     appBar: AppBar(
@@ -99,61 +97,66 @@ class _CategoryItemsScreenState extends State<CategoryItemsScreen> {
     //     ),
     //   );
     // }
-    return Container(
-      color: Colors.green,
-      child: StreamBuilder<QuerySnapshot>(
-        stream: _getCategories(),
-        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-          if (!snapshot.hasData) return LoadingWidget();
-          final _data = snapshot.data!.docs;
-          return GridView.count(
+    return StreamBuilder<QuerySnapshot>(
+      stream: _getCategories(),
+      builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+        if (!snapshot.hasData) return LoadingWidget();
+        final _data = snapshot.data!.docs;
+        //
+        debugPrint('_data = $_data');
+        if (_data.isEmpty) {
+          return EmptyWidget();
+        }
+        return GridView.builder(
+          physics: const NeverScrollableScrollPhysics(),
+          shrinkWrap: true,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2,
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            children: _data.asMap().entries.map<Widget>((e) {
-              return GestureDetector(
-                onTap: () {
-                  onItemClicked(context, e.value['cat_id']);
-                },
-                child: Container(
-                  height: 100,
+          ),
+          itemCount: _data.length,
+          itemBuilder: (context, index) {
+            return InkWell(
+              onTap: () {
+                // debugPrint(' on CLik on ${_data[index]['cat_name']}');
+                // return;
+                onItemClicked(context, _data[index]['cat_name']);
+              },
+              child: Container(
+                height: 100,
+                margin: const EdgeInsets.all(10.0),
+                child: Stack(
                   clipBehavior: Clip.antiAlias,
-                  margin: const EdgeInsets.all(10.0),
-                  decoration: BoxDecoration(
-                    color: Colors.teal,
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
-                  child: Stack(
-                    clipBehavior: Clip.antiAlias,
-                    alignment: Alignment.center,
-                    children: [
-                      Positioned.fill(
-                        child: Image.network(
-                          e.value['img_path'],
-                          fit: BoxFit.cover,
+                  alignment: Alignment.center,
+                  children: [
+                    Positioned.fill(
+                      child: ImgNetwork(
+                        imageUrl: _data[index]['img_path'],
+                        // fit: BoxFit.cover,
+                      ),
+                    ),
+                    Positioned(
+                      bottom: 10.0,
+                      child: Container(
+                        padding: EdgeInsets.symmetric(horizontal: 30),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(.3),
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                        child: AppText(
+                          text: _data[index]['cat_name'],
+                          fontSize: 22,
+                          color: Colors.black.withOpacity(.90),
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                      Positioned(
-                        top: 10.0,
-                        child: Center(
-                          child: AppText(
-                            text: e.value['cat_name'],
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              );
-            }).toList(),
-
-            mainAxisSpacing: 3.0,
-            crossAxisSpacing: 0.0, // add some space
-          );
-        },
-      ),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 
@@ -163,7 +166,7 @@ class _CategoryItemsScreenState extends State<CategoryItemsScreen> {
       MaterialPageRoute(
         builder: (context) => ProductsPage(
           isShowScaffold: true,
-          productID: productID,
+          categoryID: productID,
         ),
       ),
     );

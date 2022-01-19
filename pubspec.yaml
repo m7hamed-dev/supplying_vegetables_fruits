@@ -25,8 +25,18 @@ dependencies:
   cached_network_image: ^3.2.0
   # firebase to auth
   firebase_auth: ^3.3.5
-  # to sabve some data on local
+  # to save some data on local
   shared_preferences: ^2.0.12
+  # to show message for user or admin
+  flutter_easyloading: ^3.0.3
+  # to share data between screens
+  provider: ^6.0.2
+  # to get image parth
+  path: ^1.8.0
+  # to save image into path
+  firebase_storage: ^10.2.5
+  # to pick image from diffrence source
+  image_picker: ^0.8.4+4
 
 dev_dependencies:
   flutter_test:
@@ -47,7 +57,7 @@ flutter:
     - assets/fonts/
 
   fonts:
-    - family: Gilroy
+    - family: Gilroy-Bold
       fonts:
         - asset: assets/fonts/gilroy/Gilroy-Regular.ttf
         - asset: assets/fonts/gilroy/Gilroy-SemiBold.ttf

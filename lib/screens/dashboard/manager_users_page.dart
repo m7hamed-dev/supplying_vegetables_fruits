@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:grocery_app/common_widgets/app_text.dart';
-import 'package:grocery_app/common_widgets/img_network.dart';
 import 'package:grocery_app/common_widgets/loading_widget.dart';
-import 'package:grocery_app/random_id.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ManagerUsersPage extends StatefulWidget {
@@ -19,12 +17,6 @@ class _ManagerUsersPageState extends State<ManagerUsersPage> {
 
   Stream<QuerySnapshot> _getUsers() {
     return db.collection("accountCollection").snapshots();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _getUsers();
   }
 
   @override
@@ -63,30 +55,45 @@ class _ManagerUsersPageState extends State<ManagerUsersPage> {
               return LoadingWidget();
             }
             final _data = snapshot.data!.docs;
-            return ListView(
-              children: _data.asMap().entries.map<Widget>((e) {
-                return ListTile(
-                  title: Text(e.value['name']),
-                  subtitle: Text(e.value['email']),
-                  // leading: Text(e.value['role']),
-                  trailing: IconButton(
-                    onPressed: () {
-                      debugPrint('id = ${e.value['account_id']}');
-                      db
-                          .collection('accountCollection')
-                          .doc(e.value['account_id'])
-                          .delete()
-                          .whenComplete(() {})
-                          .catchError(
-                        (onError) {
-                          debugPrint('onError $onError');
-                        },
-                      );
-                    },
-                    icon: Icon(Icons.delete),
+            if (_data.isEmpty) {
+              return Center(
+                child: Text(
+                  'no users',
+                  style: TextStyle(
+                    fontSize: 20.0,
                   ),
-                );
-              }).toList(),
+                ),
+              );
+            }
+            return ListView.separated(
+              itemCount: _data.length,
+              itemBuilder: (BuildContext context, int index) {
+                return ListTile(
+                    title: Text(_data[index]['name']),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(_data[index]['email']),
+                        Text(_data[index]['role']),
+                      ],
+                    ),
+                    leading: IconButton(
+                      onPressed: () {
+                        db
+                            .collection('accountCollection')
+                            .doc(_data[index].id)
+                            .delete();
+                      },
+                      icon: Icon(
+                        Icons.delete,
+                        color: Colors.red,
+                      ),
+                    ));
+              },
+              separatorBuilder: (context, index) => Divider(
+                thickness: 10.0,
+                color: Colors.grey.shade200,
+              ),
             );
           },
         ),
