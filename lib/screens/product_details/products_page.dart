@@ -3,9 +3,10 @@ import 'package:grocery_app/common_widgets/app_text.dart';
 import 'package:grocery_app/common_widgets/img_network.dart';
 import 'package:grocery_app/common_widgets/loading_widget.dart';
 import 'package:grocery_app/common_widgets/rounded_widget.dart';
-import 'package:grocery_app/random_id.dart';
+import 'package:grocery_app/helpers/push.dart';
 import 'package:grocery_app/screens/cart/cart_provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:grocery_app/screens/cart/cart_screen.dart';
 import 'package:provider/src/provider.dart';
 
 class ProductsPage extends StatefulWidget {
@@ -45,10 +46,8 @@ class _ProductsPageState extends State<ProductsPage> {
         elevation: 0,
         centerTitle: true,
         automaticallyImplyLeading: false,
-        leading: GestureDetector(
-          onTap: () {
-            Navigator.pop(context);
-          },
+        leading: InkWell(
+          onTap: () => Navigator.pop(context),
           child: Container(
             padding: EdgeInsets.only(left: 25),
             child: Icon(
@@ -62,6 +61,21 @@ class _ProductsPageState extends State<ProductsPage> {
           fontWeight: FontWeight.bold,
           fontSize: 20,
         ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: InkWell(
+              onTap: () => Push.to(context, const CartPage()),
+              child: Container(
+                padding: EdgeInsets.only(left: 25),
+                child: Icon(
+                  Icons.shopping_basket_outlined,
+                  color: Colors.black,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
       body: ListView(
         children: [
@@ -113,24 +127,6 @@ class _ProductsPageState extends State<ProductsPage> {
                       color: Colors.green,
                       onPressed: () {
                         _cartProvider.addProtductToCart(_data[index]);
-                        return;
-                        Map<String, dynamic> _map = {
-                          'id': randomId,
-                          'name': _data[index]['product_name'],
-                          'img_path': _data[index]['img_path'],
-                          // when add product to cart init qty equal one
-                          'qty': '1',
-                          'date_to_cart': '${DateTime.now()}',
-                        };
-                        db
-                            .collection('cartCollection')
-                            .doc(randomId)
-                            .set(_map)
-                            .then((value) {})
-                            .whenComplete(() {})
-                            .catchError((onError) {
-                          debugPrint('onError = $onError');
-                        });
                       },
                       child: Text(
                         'Add to Cart',

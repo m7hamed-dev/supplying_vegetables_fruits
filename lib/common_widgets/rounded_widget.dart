@@ -1,16 +1,29 @@
 import 'package:flutter/material.dart';
 
 class RoundedWidget extends StatelessWidget {
-  final Widget child;
+  const RoundedWidget({
+    Key? key,
+    required this.child,
+    this.width,
+    this.height,
+    this.color,
+  }) : super(key: key);
 
-  const RoundedWidget({Key? key, required this.child}) : super(key: key);
+  final double? width;
+  final double? height;
+  final Widget child;
+  final Color? color;
+  //
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(10.0),
+      width: width,
+      height: height,
+      alignment: Alignment.center,
+      padding: const EdgeInsets.all(5.0),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20.0),
-        color: Colors.green,
+        color: color ?? Colors.green,
       ),
       child: child,
     );

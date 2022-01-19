@@ -3,59 +3,97 @@ import 'package:flutter/material.dart';
 import 'package:grocery_app/helpers/toasts/toast.dart';
 
 class CartProvider extends ChangeNotifier {
-  List<QueryDocumentSnapshot<Object?>> cartItems = [];
   double _price = 0.0;
-  int qty = 0;
+  double _singlePrice = 0.0;
+  // get
   double get totalPrice => _price;
+  double get singlePrice => _singlePrice;
   //
-  void addQty(QueryDocumentSnapshot<Object?> product) {
-    Map map = {
-      'qty': product.get('qty'),
-    };
-    int cartModel = CartModel.fromJson(map).qty++;
-    _price = _price * cartModel;
-    // cartModel = cartModel + 1;
-    debugPrint('cartModel = ${cartModel++}');
-    notifyListeners();
-    // debugPrint(' _qty = $_qty');
-    // product.
-    // int r = product.get('qty');
-    // if (r != 0) {
-    //   r += 1;
-    //   debugPrint('r = $r');
-    // }
+  List<CartModel> cartModels = <CartModel>[];
+  List<CartModel> searchCartModels = <CartModel>[];
+  //
+  void search(String value) {
+    searchCartModels = value.isNotEmpty
+        ? cartModels.where((element) {
+            if (element.name.contains(value)) {
+              notifyListeners();
+              return true;
+            }
+            notifyListeners();
+            return false;
+          }).toList()
+        : cartModels;
   }
 
   //
+  void addQty(CartModel product) {
+    product.qty++;
+    // _singlePrice = double.parse(cartModels[product].price) * 1.0;
+    _price = product.qty * double.parse(product.price);
+    notifyListeners();
+  }
+
+  void removeQty(CartModel product) {
+    if (product.qty > 0) {
+      product.qty--;
+      _price = product.qty * double.parse(product.price);
+      notifyListeners();
+    }
+  }
+
+  //  add product to your cart
   void addProtductToCart(QueryDocumentSnapshot<Object?> product) {
-    if (cartItems.contains(product)) {
+    CartModel _cartModel = CartModel(
+      product.get('qty'),
+      product.get('product_price'),
+      product.get('product_name'),
+      product.get('product_description'),
+      product.get('img_path'),
+    );
+
+    if (cartModels.contains(_cartModel)) {
       Toast.error(error: 'this product is alerady exist on your cart !!');
       return;
     }
-    _price = _price + int.parse(product.get('product_price'));
-    cartItems.add(product);
-
+    cartModels.add(_cartModel);
+    notifyListeners();
     // _price = _price + int.parse(product['product_price']);
     Toast.success(msg: 'add to cart succussfly !!');
     notifyListeners();
   }
 
-  void removeProtductFromCart(QueryDocumentSnapshot<Object?> product) {
-    cartItems.remove(product);
-    if (cartItems.isEmpty) {
+  //  remove product from cart
+  void removeProtductFromCart(CartModel product) {
+    cartModels.remove(product);
+    //
+    if (cartModels.isEmpty) {
       _price = 0.0;
-    } else
-      _price = _price - int.parse(product.get('product_price'));
-    notifyListeners();
+      notifyListeners();
+    } else {
+      // _price = _price - int.parse(product.get('product_price'));
+      notifyListeners();
+    }
   }
   //
 }
 
 class CartModel {
+  CartModel(this.qty, this.price, this.name, this.description, this.imgPath);
+//
   int qty;
-  CartModel(this.qty);
+  String price;
+  String name;
+  String description;
+  String imgPath;
+  //
   //
   factory CartModel.fromJson(Map map) {
-    return CartModel(map['qty']);
+    return CartModel(
+      map['qty'],
+      map['product_price'],
+      map['product_name'],
+      map['product_description'],
+      map['img_path'],
+    );
   }
 }

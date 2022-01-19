@@ -20,6 +20,7 @@ class _AddProductsPageState extends State<AddProductsPage> {
   TextEditingController _productDescriptionController = TextEditingController();
   TextEditingController _productNameController = TextEditingController();
   TextEditingController _pricetController = TextEditingController();
+  TextEditingController _qtyController = TextEditingController();
   Map<String, dynamic> _map = Map<String, dynamic>();
   //
   Stream<QuerySnapshot> _getCategoriesName() {
@@ -103,6 +104,12 @@ class _AddProductsPageState extends State<AddProductsPage> {
             ),
             const SizedBox(height: 10.0),
             Input(
+              controller: _qtyController,
+              hintText: 'qty',
+              isNumberKeyBoard: true,
+            ),
+            const SizedBox(height: 10.0),
+            Input(
               controller: _productDescriptionController,
               hintText: 'product description',
             ),
@@ -120,6 +127,7 @@ class _AddProductsPageState extends State<AddProductsPage> {
                   'product_name': _productNameController.text,
                   'product_description': _productDescriptionController.text,
                   'product_price': _pricetController.text,
+                  'qty': _qtyController.text,
                   'img_path':
                       'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRXnGnYZMb2sJhJ1tlcUsA6VRfZM3NtdKMeig&usqp=CAU'
                 };

@@ -26,6 +26,7 @@ class AppText extends StatelessWidget {
         fontWeight: fontWeight,
         color: color,
         fontFamily: 'Gilroy-Bold',
+        overflow: TextOverflow.fade,
       ),
     );
   }
