@@ -46,7 +46,7 @@ class _ManagerOrdersPageState extends State<ManagerOrdersPage> {
           ),
         ),
         title: AppText(
-          text: "Manager Users Page",
+          text: "Manager Orders Page",
           fontWeight: FontWeight.bold,
           fontSize: 20,
         ),
@@ -61,30 +61,31 @@ class _ManagerOrdersPageState extends State<ManagerOrdersPage> {
               return LoadingWidget();
             }
             final _data = snapshot.data!.docs;
-            return ListView(
-              children: _data.asMap().entries.map<Widget>((e) {
+
+            return ListView.builder(
+              itemCount: _data.length,
+              itemBuilder: (BuildContext context, int index) {
                 return ListTile(
-                  title: Text(e.value['name']),
-                  subtitle: Text(e.value['email']),
+                  title: Text(_data[index]['name']),
+                  subtitle: Text(_data[index]['email']),
                   // leading: Text(e.value['role']),
                   trailing: IconButton(
                     onPressed: () {
-                      debugPrint('id = ${e.value['account_id']}');
-                      db
-                          .collection('accountCollection')
-                          .doc(e.value['account_id'])
-                          .delete()
-                          .whenComplete(() {})
-                          .catchError(
-                        (onError) {
-                          debugPrint('onError $onError');
-                        },
-                      );
+                      // db
+                      //     .collection('accountCollection')
+                      //     .doc(_data[index]['account_id'])
+                      //     .delete()
+                      //     .whenComplete(() {})
+                      //     .catchError(
+                      //   (onError) {
+                      //     debugPrint('onError $onError');
+                      //   },
+                      // );
                     },
                     icon: Icon(Icons.delete),
                   ),
                 );
-              }).toList(),
+              },
             );
           },
         ),

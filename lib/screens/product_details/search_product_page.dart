@@ -1,7 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:grocery_app/common_widgets/app_text.dart';
+import 'package:grocery_app/common_widgets/custom_container.dart';
+import 'package:grocery_app/common_widgets/empty_widget.dart';
 import 'package:grocery_app/common_widgets/img_network.dart';
 import 'package:grocery_app/common_widgets/input.dart';
+import 'package:grocery_app/common_widgets/loading_widget.dart';
 import 'package:grocery_app/helpers/push.dart';
 import 'package:grocery_app/screens/cart/cart_provider.dart';
 import 'package:grocery_app/screens/cart/cart_screen.dart';
@@ -17,15 +21,25 @@ class SearchProductsPage extends StatefulWidget {
 }
 
 class _SearchProductsPageState extends State<SearchProductsPage> {
+  final db = FirebaseFirestore.instance;
+
+  Stream<QuerySnapshot> _getProducts(String? value) {
+    if (value != null) {
+      return db
+          .collection("productsCollection")
+          .where('product_name', isEqualTo: value)
+          .snapshots();
+    }
+    // when you need to showing all products without filltering
+    return db.collection("productsCollection").snapshots();
+  }
+
+  String _value = '';
+  //
   @override
   Widget build(BuildContext context) {
-    final _cartProvider = context.watch<CartProvider>();
-
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        centerTitle: true,
         automaticallyImplyLeading: false,
         leading: InkWell(
           onTap: () => Navigator.pop(context),
@@ -62,62 +76,80 @@ class _SearchProductsPageState extends State<SearchProductsPage> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: Column(
+        child: ListView(
           children: [
+            //
             Input(
-              hintText: 'search',
-              onChanged: (value) {
-                _cartProvider.search(value);
+              onChanged: (val) {
+                _value = val;
+                setState(() {});
               },
             ),
-            ListView.separated(
-              itemCount: _cartProvider.searchCartModels.length,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemBuilder: (BuildContext context, int index) {
-                return ListTile(
-                  title: AppText(
-                    text: _cartProvider.searchCartModels[index].name,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      AppText(
-                        text: _cartProvider.searchCartModels[index].price +
-                            ' \R.S',
-                        fontSize: 18,
-                        color: Colors.green,
+            //
+            StreamBuilder<QuerySnapshot>(
+              stream: _getProducts(_value),
+              builder: (BuildContext context,
+                  AsyncSnapshot<QuerySnapshot> snapshot) {
+                if (!snapshot.hasData) {
+                  return LoadingWidget();
+                }
+                final _data = snapshot.data!.docs;
+                //
+                if (_value.isEmpty) {
+                  return EmptyWidget();
+                }
+                return ListView.separated(
+                  itemCount: _data.length,
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemBuilder: (BuildContext context, int index) {
+                    return CustomContainer(
+                      margin: const EdgeInsets.only(top: 10.0),
+                      child: ListTile(
+                        title: AppText(
+                          text: _data[index]['product_name'],
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            AppText(
+                              text: _data[index]['product_price'] + ' \R.S',
+                              fontSize: 18,
+                              color: Colors.green,
+                            ),
+                            AppText(
+                              text:
+                                  _data[index]['product_description'] + ' \R.S',
+                              fontSize: 14,
+                              color: Colors.grey,
+                            ),
+                          ],
+                        ),
+                        leading: ImgNetwork(
+                          imageUrl: _data[index]['img_path'],
+                        ),
+                        trailing: MaterialButton(
+                          color: Colors.green,
+                          onPressed: () {
+                            final _cartProvider = context.read<CartProvider>();
+                            _cartProvider.addProtductToCart(_data[index]);
+                          },
+                          child: Text(
+                            'Add to Cart',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
                       ),
-                      AppText(
-                        text:
-                            _cartProvider.searchCartModels[index].description +
-                                ' \R.S',
-                        fontSize: 14,
-                        color: Colors.grey,
-                      ),
-                    ],
-                  ),
-                  leading: ImgNetwork(
-                    imageUrl: _cartProvider.searchCartModels[index].imgPath,
-                  ),
-                  trailing: MaterialButton(
-                    color: Colors.green,
-                    onPressed: () {
-                      // _cartProvider.addProtductToCart(_cartProvider.searchCartModels[index]);
-                    },
-                    child: Text(
-                      'Add to Cart',
-                      style: TextStyle(color: Colors.white),
-                    ),
+                    );
+                  },
+                  separatorBuilder: (context, index) => Divider(
+                    color: Colors.grey.shade200,
+                    thickness: 4.0,
                   ),
                 );
               },
-              separatorBuilder: (context, index) => Divider(
-                color: Colors.grey.shade200,
-                thickness: 4.0,
-              ),
             ),
           ],
         ),

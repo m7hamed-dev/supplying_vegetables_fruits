@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:grocery_app/common_widgets/app_text.dart';
+import 'package:grocery_app/common_widgets/rounded_widget.dart';
 import 'package:grocery_app/widgets/search_bar_widget.dart';
 
 class HomeBanner extends StatelessWidget {
@@ -20,11 +21,14 @@ class HomeBanner extends StatelessWidget {
           ),
           Positioned(
             top: 10.0,
-            child: Center(
+            child: RoundedWidget(
+              width: 220.0,
+              height: 45.0,
+              color: Colors.white.withOpacity(.50),
               child: AppText(
                 text: "من المزارع مباشرة",
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
+                fontSize: 16.0,
+                // fontWeight: FontWeight.bold,
               ),
             ),
           ),

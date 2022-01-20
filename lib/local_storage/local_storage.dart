@@ -18,6 +18,7 @@ class LocalStorage {
 
   // user info
   static void setUserInfoPrfs(Map map) {
+    prefs.setString('accountIdKey', map['account_id']);
     prefs.setString('emailKey', map['email']);
     prefs.setString('numberKey', map['number_comercial']);
     prefs.setString('phoneKey', map['phone']);
@@ -25,4 +26,6 @@ class LocalStorage {
   }
 
   static String get getEmail => prefs.getString('emailKey') ?? '';
+  static String get getPhone => prefs.getString('phoneKey') ?? '';
+  static String get getAccountID => prefs.getString('accountIdKey') ?? '';
 }

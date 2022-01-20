@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:grocery_app/screens/account/account_screen.dart';
+import 'package:grocery_app/screens/account/register_acount_page.dart';
 import 'package:grocery_app/screens/cart/cart_screen.dart';
 import 'package:grocery_app/screens/home/home_screen.dart';
 
@@ -15,5 +16,10 @@ class NavigatorItem {
 List<NavigatorItem> navigatorItems = [
   NavigatorItem("Shop", "assets/icons/shop_icon.svg", 0, HomeScreen()),
   NavigatorItem("Cart", "assets/icons/cart_icon.svg", 2, CartPage()),
-  NavigatorItem("Account", "assets/icons/account_icon.svg", 4, AccountPage()),
+  NavigatorItem(
+    "Account",
+    "assets/icons/account_icon.svg",
+    4,
+    const RegisterAccountPage(),
+  ),
 ];

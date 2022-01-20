@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:grocery_app/common_widgets/app_text.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:grocery_app/common_widgets/custom_container.dart';
+import 'package:grocery_app/screens/cart/cart_provider.dart';
+import 'package:provider/src/provider.dart';
 
 class DetailsInvoicePage extends StatefulWidget {
   const DetailsInvoicePage({Key? key}) : super(key: key);
@@ -20,6 +23,7 @@ class _DetailsInvoicePageState extends State<DetailsInvoicePage> {
   //
   @override
   Widget build(BuildContext context) {
+    final _cartProvider = context.watch<CartProvider>();
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -46,8 +50,8 @@ class _DetailsInvoicePageState extends State<DetailsInvoicePage> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(15.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+        child: ListView(
+          // crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
               'Thanks You !!',
@@ -63,19 +67,29 @@ class _DetailsInvoicePageState extends State<DetailsInvoicePage> {
               ),
             ),
             const SizedBox(height: 30),
-            Column(
-              children: List.generate(
-                5,
-                (index) => Text(
-                  'Product No. $index',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15.0,
+            ListView(
+              physics: NeverScrollableScrollPhysics(),
+              shrinkWrap: true,
+              children: _cartProvider.cartModels.map((e) {
+                return CustomContainer(
+                  margin: const EdgeInsets.all(5.0),
+                  padding: const EdgeInsets.all(10.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(e.name),
+                      const SizedBox(width: 10.0),
+                      Text(e.price),
+                      InkWell(
+                          onTap: () {
+                            _cartProvider.removeProtductFromCart(e);
+                          },
+                          child: Icon(Icons.delete_forever)),
+                    ],
                   ),
-                ),
-              ).toList(),
+                );
+              }).toList(),
             ),
-            Spacer(),
             IconButton(
               onPressed: () {},
               icon: Text(

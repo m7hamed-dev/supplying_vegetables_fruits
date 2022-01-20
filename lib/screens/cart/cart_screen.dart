@@ -1,10 +1,18 @@
+import 'package:badges/badges.dart';
 import 'package:flutter/material.dart';
 import 'package:grocery_app/common_widgets/app_text.dart';
+import 'package:grocery_app/common_widgets/btn.dart';
+import 'package:grocery_app/common_widgets/custom_container.dart';
 import 'package:grocery_app/common_widgets/empty_widget.dart';
 import 'package:grocery_app/common_widgets/img_network.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:grocery_app/common_widgets/rounded_widget.dart';
+import 'package:grocery_app/helpers/push.dart';
+import 'package:grocery_app/helpers/toasts/toast.dart';
+import 'package:grocery_app/local_storage/local_storage.dart';
+import 'package:grocery_app/random_id.dart';
 import 'package:grocery_app/screens/cart/cart_provider.dart';
+import 'package:grocery_app/screens/invoice/invoice_page.dart';
 import 'package:provider/src/provider.dart';
 
 class CartPage extends StatefulWidget {
@@ -50,13 +58,9 @@ class _CartPageState extends State<CartPage> {
           : ListView.separated(
               itemCount: _cartProvider.cartModels.length,
               itemBuilder: (BuildContext context, int index) {
-                return Container(
+                return CustomContainer(
                   padding: const EdgeInsets.all(10.0),
-                  margin: const EdgeInsets.all(5.0),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10.0),
-                    color: Colors.grey.shade100,
-                  ),
+                  margin: const EdgeInsets.all(10.0),
                   child: Stack(
                     clipBehavior: Clip.none,
                     // mainAxisAlignment: MainAxisAlignment.start,
@@ -98,15 +102,6 @@ class _CartPageState extends State<CartPage> {
                               // price , increment and decrement qty
                               Row(
                                 children: [
-                                  AppText(
-                                    text:
-                                        '${_cartProvider.cartModels[index].qty}',
-                                    fontSize: 22.0,
-                                    color: Colors.green,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                  //
-                                  const SizedBox(width: 100.0),
                                   // add qty
                                   InkWell(
                                     onTap: () {
@@ -119,12 +114,20 @@ class _CartPageState extends State<CartPage> {
                                     ),
                                   ),
                                   const SizedBox(width: 10.0),
-                                  //  price
-                                  AppText(
-                                    text: _cartProvider.cartModels[index].price,
-                                    fontSize: 22.0,
-                                    color: Colors.green,
-                                    fontWeight: FontWeight.bold,
+                                  // qty
+                                  Badge(
+                                    toAnimate: true,
+                                    padding: const EdgeInsets.all(5.9),
+                                    // shape: BadgeShape.square,
+                                    badgeColor: Colors.white.withOpacity(.50),
+                                    // borderRadius: BorderRadius.circular(8),
+                                    badgeContent: AppText(
+                                      text:
+                                          '${_cartProvider.cartModels[index].qty}',
+                                      fontSize: 22.0,
+                                      color: Colors.green,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                   const SizedBox(width: 10.0),
                                   // remove qty
@@ -144,20 +147,24 @@ class _CartPageState extends State<CartPage> {
                           )
                         ],
                       ),
+                      // remove product
                       Positioned(
                         top: -25,
                         right: 10.0,
-                        child: InkWell(
+                        height: 40,
+                        width: 40,
+                        child: GestureDetector(
                           onTap: () {
+                            debugPrint('statement');
                             _cartProvider.removeProtductFromCart(
                                 _cartProvider.cartModels[index]);
                           },
                           child: RoundedWidget(
                             height: 40,
                             width: 40,
-                            color: Colors.white,
+                            color: Colors.grey.shade400,
                             child: Icon(
-                              Icons.delete_forever_rounded,
+                              Icons.cancel_rounded,
                               color: Colors.red,
                             ),
                           ),
@@ -191,8 +198,51 @@ class _CartPageState extends State<CartPage> {
         ),
         child: Row(
           children: [
-            Text('total Price = ${_cartProvider.totalPrice}'),
+            Badge(
+              shape: BadgeShape.square,
+              badgeColor: Colors.white,
+              borderRadius: BorderRadius.circular(8),
+              badgeContent: Text('total Price = ${_cartProvider.totalPrice}'),
+            ),
             const SizedBox(width: 10.0),
+            InkWell(
+              onTap: () {
+                Push.to(context, const DetailsInvoicePage());
+              },
+              child: Text('Invoice'),
+            ),
+            const SizedBox(width: 10.0),
+            Btn(
+              onPressed: () {
+                Toast.loading();
+                //
+                for (var i = 0; i < _cartProvider.cartModels.length; i++) {
+                  debugPrint('id = ${_cartProvider.cartModels[i].vendorID}');
+                  final Map<String, dynamic> _map = {
+                    'order_id': randomId,
+                    'name': _cartProvider.cartModels[i].name,
+                    'price': _cartProvider.cartModels[i].price,
+                    'date_to_cart': DateTime.now().toString(),
+                    'status': 'new',
+                    'account_id': _cartProvider.cartModels[i].vendorID,
+                    'phone': LocalStorage.getPhone,
+                    'email': LocalStorage.getEmail,
+                  };
+                  db
+                      .collection('orderCollection')
+                      .doc(randomId)
+                      .set(_map)
+                      .then((value) {
+                    Toast.success();
+                  }).catchError((onError) {
+                    Toast.error(error: onError.toString());
+                    debugPrint('onError = $onError');
+                  });
+                }
+                // Push.to(context, const DetailsInvoicePage());
+              },
+              title: 'end Invoice',
+            ),
           ],
         ),
       ),

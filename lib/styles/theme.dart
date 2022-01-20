@@ -7,6 +7,9 @@ ThemeData themeData = ThemeData(
   primaryColor: AppColors.primaryColor,
   fontFamily: gilroyFontFamily,
   visualDensity: VisualDensity.adaptivePlatformDensity,
-  colorScheme:
-      ColorScheme.fromSwatch().copyWith(secondary: AppColors.primaryColor),
+  appBarTheme: AppBarTheme(
+    color: Colors.white,
+    elevation: 0.5,
+    centerTitle: true,
+  ),
 );

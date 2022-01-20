@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:grocery_app/helpers/toasts/toast.dart';
 
 class CartProvider extends ChangeNotifier {
+  final db = FirebaseFirestore.instance;
   double _price = 0.0;
   double _singlePrice = 0.0;
   // get
@@ -10,19 +11,28 @@ class CartProvider extends ChangeNotifier {
   double get singlePrice => _singlePrice;
   //
   List<CartModel> cartModels = <CartModel>[];
-  List<CartModel> searchCartModels = <CartModel>[];
   //
+  void setStreamProducts(String value) {
+    //Stream<QuerySnapshot>
+    // searchCartModels =
+    //     db.collection("productsCollection").snapshots().map((event) {
+    //   return event.docs.map((e) {
+    //     return CartModel.fromJson(e.data());
+    //   }).toList();
+    // });
+  }
+
   void search(String value) {
-    searchCartModels = value.isNotEmpty
-        ? cartModels.where((element) {
-            if (element.name.contains(value)) {
-              notifyListeners();
-              return true;
-            }
-            notifyListeners();
-            return false;
-          }).toList()
-        : cartModels;
+    // searchCartModels = value.isNotEmpty
+    //     ? cartModels.where((element) {
+    //         if (element.name.contains(value)) {
+    //           notifyListeners();
+    //           return true;
+    //         }
+    //         notifyListeners();
+    //         return false;
+    //       }).toList()
+    //     : cartModels;
   }
 
   //
@@ -43,7 +53,9 @@ class CartProvider extends ChangeNotifier {
 
   //  add product to your cart
   void addProtductToCart(QueryDocumentSnapshot<Object?> product) {
-    CartModel _cartModel = CartModel(
+    final CartModel _cartModel = CartModel(
+      product.get('product_id'),
+      product.get('vendor_id'),
       product.get('qty'),
       product.get('product_price'),
       product.get('product_name'),
@@ -78,8 +90,11 @@ class CartProvider extends ChangeNotifier {
 }
 
 class CartModel {
-  CartModel(this.qty, this.price, this.name, this.description, this.imgPath);
-//
+  CartModel(this.id, this.vendorID, this.qty, this.price, this.name,
+      this.description, this.imgPath);
+  //
+  String id;
+  String vendorID;
   int qty;
   String price;
   String name;
@@ -89,6 +104,8 @@ class CartModel {
   //
   factory CartModel.fromJson(Map map) {
     return CartModel(
+      map['vendor_id'],
+      map['product_id'],
       map['qty'],
       map['product_price'],
       map['product_name'],

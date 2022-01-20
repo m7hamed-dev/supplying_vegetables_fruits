@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:grocery_app/common_widgets/app_text.dart';
+import 'package:grocery_app/common_widgets/custom_container.dart';
 import 'package:grocery_app/common_widgets/loading_widget.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ManagerPhramPage extends StatefulWidget {
-  const ManagerPhramPage({Key? key}) : super(key: key);
-
+  const ManagerPhramPage({Key? key, this.isShowAppBar}) : super(key: key);
+  final bool? isShowAppBar;
+  //
   @override
   State<ManagerPhramPage> createState() => _ManagerPhramPageState();
 }
@@ -32,12 +34,8 @@ class _ManagerPhramPageState extends State<ManagerPhramPage> {
           itemCount: _data.length,
           itemBuilder: (BuildContext context, int index) {
             // ui
-            return Container(
+            return CustomContainer(
               padding: const EdgeInsets.all(10.0),
-              decoration: BoxDecoration(
-                color: Colors.grey.shade200,
-                borderRadius: BorderRadius.circular(10.0),
-              ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
