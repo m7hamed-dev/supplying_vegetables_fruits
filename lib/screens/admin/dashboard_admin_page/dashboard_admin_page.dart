@@ -33,11 +33,7 @@ class DashboardDdminPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 20.0),
-              CurrentUserInfoWidget(
-                title: 'mohamed',
-                subtitle: 'moh94syed@g.com',
-                imageUrl: 'imageUrl',
-              ),
+              CurrentUserInfoWidget(),
               const SizedBox(height: 20.0),
               Expanded(
                 child: GridView.count(

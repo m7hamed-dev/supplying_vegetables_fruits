@@ -11,6 +11,7 @@ import 'package:grocery_app/screens/dashboard/dashboard_screen.dart';
 import 'package:grocery_app/screens/dashboard/manager_users_page.dart';
 import 'package:grocery_app/screens/invoice/invoice_page.dart';
 import 'package:grocery_app/screens/product_details/add_products_page.dart';
+import 'package:grocery_app/screens/welcome_screen.dart';
 import 'package:provider/provider.dart';
 import 'screens/account/register_acount_page.dart';
 import 'screens/admin/manager_pharm_page.dart';
@@ -49,13 +50,13 @@ class MyApp extends StatelessWidget {
     //
     return MaterialApp(
       theme: themeData,
-      home: OrdersVendorPage(),
+      // home: RegisterAccountPage(),
       debugShowCheckedModeBanner: false,
-      // home: _firebaseAuth.currentUser == null
-      //     ? AccountPage()
-      //     : role == 'user'
-      //         ? DashboardScreen()
-      //         : DashboardDdminPage(),
+      home: _firebaseAuth.currentUser == null
+          ? RegisterAccountPage()
+          : role == 'user'
+              ? DashboardScreen()
+              : DashboardDdminPage(),
       builder: EasyLoading.init(),
     );
   }

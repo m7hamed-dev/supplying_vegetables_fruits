@@ -2,13 +2,20 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 class ImgNetwork extends StatelessWidget {
-  const ImgNetwork({Key? key, required this.imageUrl}) : super(key: key);
+  const ImgNetwork({
+    Key? key,
+    required this.imageUrl,
+    this.width,
+    this.height,
+  }) : super(key: key);
   final String imageUrl;
+  final double? width;
+  final double? height;
   @override
   Widget build(BuildContext context) {
     return CachedNetworkImage(
-      width: 60,
-      height: 70,
+      width: width ?? 60,
+      height: height ?? 70,
       imageUrl: imageUrl,
       imageBuilder: (context, imageProvider) => Container(
         padding: const EdgeInsets.all(3.0),

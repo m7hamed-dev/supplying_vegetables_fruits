@@ -39,7 +39,11 @@ class CartProvider extends ChangeNotifier {
   void addQty(CartModel product) {
     product.qty++;
     // _singlePrice = double.parse(cartModels[product].price) * 1.0;
-    _price = product.qty * double.parse(product.price);
+    _singlePrice = product.qty * double.parse(product.price);
+    _price += _singlePrice;
+    // _price = _price + int.parse(product['product_price']);
+    debugPrint('_price = $_price');
+    // return;
     notifyListeners();
   }
 
@@ -53,10 +57,11 @@ class CartProvider extends ChangeNotifier {
 
   //  add product to your cart
   void addProtductToCart(QueryDocumentSnapshot<Object?> product) {
+    // define obj from cart model
     final CartModel _cartModel = CartModel(
       product.get('product_id'),
       product.get('vendor_id'),
-      product.get('qty'),
+      1,
       product.get('product_price'),
       product.get('product_name'),
       product.get('product_description'),
@@ -67,9 +72,10 @@ class CartProvider extends ChangeNotifier {
       Toast.error(error: 'this product is alerady exist on your cart !!');
       return;
     }
+    _price = _cartModel.qty * double.parse(product['product_price']);
+
     cartModels.add(_cartModel);
     notifyListeners();
-    // _price = _price + int.parse(product['product_price']);
     Toast.success(msg: 'add to cart succussfly !!');
     notifyListeners();
   }
@@ -95,7 +101,7 @@ class CartModel {
   //
   String id;
   String vendorID;
-  int qty;
+  int qty = 1;
   String price;
   String name;
   String description;

@@ -74,30 +74,35 @@ class _CartPageState extends State<CartPage> {
                           // img
                           ImgNetwork(
                             imageUrl: _cartProvider.cartModels[index].imgPath,
+                            height: 120.0,
+                            width: 80.0,
                           ),
                           const SizedBox(width: 10.0),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               // name , remove product
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  AppText(
-                                    text: _cartProvider.cartModels[index].name,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                  const SizedBox(width: 100.0),
-                                ],
+                              AppText(
+                                text: _cartProvider.cartModels[index].name,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
                               ),
+                              const SizedBox(width: 100.0),
                               // description
                               AppText(
                                 text: _hundleString(_cartProvider
                                     .cartModels[index].description),
                                 fontSize: 11,
+                                color: Colors.black,
+                              ),
+                              const SizedBox(width: 100.0),
+                              // description
+                              AppText(
+                                text:
+                                    '${_cartProvider.cartModels[index].price} R.S',
+                                fontSize: 16.0,
+                                color: Colors.green,
+                                fontWeight: FontWeight.bold,
                               ),
                               // price , increment and decrement qty
                               Row(
@@ -227,6 +232,7 @@ class _CartPageState extends State<CartPage> {
                     'account_id': _cartProvider.cartModels[i].vendorID,
                     'phone': LocalStorage.getPhone,
                     'email': LocalStorage.getEmail,
+                    'total_price': _cartProvider.totalPrice,
                   };
                   db
                       .collection('orderCollection')
@@ -234,6 +240,8 @@ class _CartPageState extends State<CartPage> {
                       .set(_map)
                       .then((value) {
                     Toast.success();
+                    _cartProvider.cartModels.length = 0;
+                    setState(() {});
                   }).catchError((onError) {
                     Toast.error(error: onError.toString());
                     debugPrint('onError = $onError');
@@ -261,10 +269,8 @@ class _CartPageState extends State<CartPage> {
       for (var i = 0; i < data.length; i++) {
         if (i < 50) {
           _newValue += data[i];
-          debugPrint('_newValue = $_newValue');
         }
       }
-      debugPrint('_newValue = $_newValue');
       return _newValue + ' ...';
     } else {
       return _newValue;

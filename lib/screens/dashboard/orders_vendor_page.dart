@@ -26,6 +26,10 @@ class _OrdersVendorPageState extends State<OrdersVendorPage> {
         .snapshots();
   }
 
+  String _statusOrder = '';
+  fillterByOrderStatus() {}
+
+  ///
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -52,7 +56,7 @@ class _OrdersVendorPageState extends State<OrdersVendorPage> {
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: StreamBuilder<QuerySnapshot>(
-          stream: _getOrders(),
+          stream: _statusOrder.isEmpty ? _getOrders() : _getOrdersByStatus(),
           builder:
               (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
             if (!snapshot.hasData) {
@@ -117,7 +121,10 @@ class _OrdersVendorPageState extends State<OrdersVendorPage> {
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           Btn(
-            onPressed: () {},
+            onPressed: () {
+              setState(() {});
+              _statusOrder = '';
+            },
             title: 'all',
           ),
           Container(
@@ -126,8 +133,11 @@ class _OrdersVendorPageState extends State<OrdersVendorPage> {
             color: Colors.grey,
           ),
           Btn(
-            onPressed: () {},
-            title: 'history',
+            onPressed: () {
+              setState(() {});
+              _statusOrder = 'rejected';
+            },
+            title: 'rejected',
             color: Colors.grey,
           ),
           Container(
@@ -136,7 +146,10 @@ class _OrdersVendorPageState extends State<OrdersVendorPage> {
             color: Colors.grey,
           ),
           Btn(
-            onPressed: () {},
+            onPressed: () {
+              setState(() {});
+              _statusOrder = 'new';
+            },
             title: 'new',
             color: Colors.blue,
           ),
@@ -219,12 +232,37 @@ class _OrdersVendorPageState extends State<OrdersVendorPage> {
           ),
           Btn(
             color: Colors.red,
-            title: 'reject - delete',
+            title: 'delete',
             onPressed: () {
               db
                   .collection('orderCollection')
                   .doc(data.id)
                   .delete()
+                  .then((value) {
+                Toast.success();
+              }).catchError((onError) {
+                Toast.error();
+              });
+            },
+          ),
+          Btn(
+            color: Colors.red,
+            title: 'reject',
+            onPressed: () {
+              final Map<String, dynamic> _map = {
+                'order_id': data['order_id'],
+                'name': data['name'],
+                'price': data['price'],
+                'date_to_cart': DateTime.now().toString(),
+                'status': 'rejected',
+                'account_id': data['account_id'],
+                'phone': data['phone'],
+                'email': data['email'],
+              };
+              db
+                  .collection('orderCollection')
+                  .doc(data.id)
+                  .set(_map)
                   .then((value) {
                 Toast.success();
               }).catchError((onError) {
@@ -261,8 +299,16 @@ class _OrdersVendorPageState extends State<OrdersVendorPage> {
     return RoundedWidget(
       child: child,
       color: Colors.grey,
-      width: 100.0,
+      width: 60.0,
       height: 40.0,
     );
+  }
+
+  Stream<QuerySnapshot> _getOrdersByStatus() {
+    return db
+        .collection("orderCollection")
+        .where('account_id', isEqualTo: '663637b7-2373-4c6e-924e-19690828f47d')
+        .where('status', isEqualTo: _statusOrder)
+        .snapshots();
   }
 }

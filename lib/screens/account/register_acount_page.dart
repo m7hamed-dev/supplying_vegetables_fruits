@@ -1,4 +1,5 @@
 import 'package:grocery_app/common_widgets/btn.dart';
+import 'package:grocery_app/common_widgets/current_user_info_widget.dart';
 import 'package:grocery_app/common_widgets/input.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -66,35 +67,35 @@ class _RegisterAccountPageState extends State<RegisterAccountPage> {
               ),
             ),
       body: _firebaseAuth.currentUser != null
-          ? _userInfo()
+          ? Center(child: CurrentUserInfoWidget())
           : Form(
               key: _formKey,
               child: ListView(
                 children: [
                   _headerProfile(),
-                  const SizedBox(height: 40.0),
+                  const SizedBox(height: 60.0),
                   //
                   Input(
                     controller: _nameController,
-                    hintText: '_nameController',
+                    hintText: 'الاسم',
                     padding: const EdgeInsets.symmetric(horizontal: 10.0),
                   ),
                   const SizedBox(height: 10.0),
                   Input(
                     controller: _numberController,
-                    hintText: '_NumberController',
+                    hintText: 'رقم السجل التجاري',
                     padding: const EdgeInsets.symmetric(horizontal: 10.0),
                   ),
                   const SizedBox(height: 10.0),
                   Input(
                     controller: _phoneController,
-                    hintText: '_phoneController',
+                    hintText: 'رقم الجوال',
                     padding: const EdgeInsets.symmetric(horizontal: 10.0),
                   ),
                   const SizedBox(height: 10.0),
                   Input(
                     controller: _emailController,
-                    hintText: '_emailController',
+                    hintText: 'الايميل',
                     padding: const EdgeInsets.symmetric(horizontal: 10.0),
                     validator: (value) {
                       Validation.isEmail(value);
@@ -103,7 +104,7 @@ class _RegisterAccountPageState extends State<RegisterAccountPage> {
                   const SizedBox(height: 10.0),
                   Input(
                     controller: _passwordController,
-                    hintText: 'passwordController',
+                    hintText: 'كلمة المرور',
                     padding: const EdgeInsets.symmetric(horizontal: 10.0),
                     // validator: (value) {
                     //   if (value != null) {
@@ -136,66 +137,71 @@ class _RegisterAccountPageState extends State<RegisterAccountPage> {
                       ),
                     ),
                   ),
-                  MaterialButton(
-                    color: Colors.green,
-                    onPressed: () async {
-                      if (!_formKey.currentState!.validate()) {
-                        return;
-                      }
-                      final _response =
-                          await _firebaseAuth.createUserWithEmailAndPassword(
-                              email: _emailController.text.trim(),
-                              password: _passwordController.text.trim());
-                      //
-                      try {
-                        if (_response.user != null) {
-                          _map = {
-                            'account_id': randomId,
-                            'name': _nameController.text,
-                            'number_comercial': _numberController.text,
-                            'email': _emailController.text,
-                            'password': _passwordController.text,
-                            'role': _role,
-                            'isActive': false,
-                          };
-                          db
-                              .collection('accountCollection')
-                              .doc(randomId)
-                              .set(_map)
-                              .then((value) {
-                            Toast.success();
-                            LocalStorage.setUserInfoPrfs(_map);
-                            bool _isSame =
-                                LocalStorage.getAccountID == _map['account_id'];
-                            debugPrint('is same = $_isSame');
-                          }).catchError((onError) {
-                            Toast.error(error: onError.toString());
-                            debugPrint('onError = $onError');
-                          });
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                    child: Btn(
+                      onPressed: () async {
+                        if (!_formKey.currentState!.validate()) {
+                          return;
                         }
-                      } catch (e) {
-                        Toast.error(error: e.toString());
-                      }
-                    },
-                    child: Text(
-                      'Register',
-                      style: TextStyle(color: Colors.white),
+                        Toast.loading();
+                        //
+                        final _response =
+                            await _firebaseAuth.createUserWithEmailAndPassword(
+                                email: _emailController.text.trim(),
+                                password: _passwordController.text.trim());
+                        //
+                        try {
+                          if (_response.user != null) {
+                            _map = {
+                              'account_id': randomId,
+                              'name': _nameController.text,
+                              'number_comercial': _numberController.text,
+                              'email': _emailController.text,
+                              'password': _passwordController.text,
+                              'role': _role,
+                              'isActive': false,
+                            };
+                            db
+                                .collection('accountCollection')
+                                .doc(randomId)
+                                .set(_map)
+                                .then((value) {
+                              Toast.success();
+                              LocalStorage.setUserInfoPrfs(_map);
+                              bool _isSame = LocalStorage.getAccountID ==
+                                  _map['account_id'];
+                              debugPrint('is same = $_isSame');
+                              Push.to(context, const LoginPage());
+                            }).catchError((onError) {
+                              // Toast.error(error: onError.toString());
+                              debugPrint('onError = $onError');
+                            });
+                          }
+                        } catch (e) {
+                          Toast.error(error: e.toString());
+                        }
+                      },
+                      title: 'التسجيل بالتطبيق',
                     ),
                   ),
                   Center(
                     child: Text(
-                      '- OR - ',
+                      '- أو - ',
                       style: TextStyle(
                         color: Colors.black,
                         fontSize: 30.0,
                       ),
                     ),
                   ),
-                  Btn(
-                    onPressed: () {
-                      Push.to(context, const LoginPage());
-                    },
-                    title: 'Login',
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                    child: Btn(
+                      onPressed: () {
+                        Push.to(context, const LoginPage());
+                      },
+                      title: 'تسجيل دخول',
+                    ),
                   ),
                 ],
               ),
@@ -203,27 +209,27 @@ class _RegisterAccountPageState extends State<RegisterAccountPage> {
     );
   }
 
-  Widget _userInfo() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        ListTile(
-          leading: CircleAvatar(),
-          title: Text('_firebaseAuth.currentUser!.displayName!'),
-          subtitle: Text(_firebaseAuth.currentUser!.email!),
-        ),
-        MaterialButton(
-          color: Colors.green,
-          onPressed: () async {
-            await _firebaseAuth.signOut();
-            LocalStorage.setRolePrfs('');
-            Push.to(context, const RegisterAccountPage());
-          },
-          child: Text('Logout'),
-        ),
-      ],
-    );
-  }
+  // Widget _userInfo() {
+  //   return Column(
+  //     crossAxisAlignment: CrossAxisAlignment.stretch,
+  //     children: [
+  //       ListTile(
+  //         leading: CircleAvatar(),
+  //         title: Text('_firebaseAuth.currentUser!.displayName!'),
+  //         subtitle: Text(_firebaseAuth.currentUser!.email!),
+  //       ),
+  //       MaterialButton(
+  //         color: Colors.green,
+  //         onPressed: () async {
+  //           await _firebaseAuth.signOut();
+  //           LocalStorage.setRolePrfs('');
+  //           Push.to(context, const RegisterAccountPage());
+  //         },
+  //         child: Text('Logout'),
+  //       ),
+  //     ],
+  //   );
+  // }
 
   InkWell _headerProfile() {
     return InkWell(
