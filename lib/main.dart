@@ -50,13 +50,13 @@ class MyApp extends StatelessWidget {
     //
     return MaterialApp(
       theme: themeData,
-      // home: RegisterAccountPage(),
+      home: WelcomeScreen(),
       debugShowCheckedModeBanner: false,
-      home: _firebaseAuth.currentUser == null
-          ? RegisterAccountPage()
-          : role == 'user'
-              ? DashboardScreen()
-              : DashboardDdminPage(),
+      // home: _firebaseAuth.currentUser == null
+      //     ? RegisterAccountPage()
+      //     : role == 'user'
+      //         ? DashboardScreen()
+      //         : DashboardDdminPage(),
       builder: EasyLoading.init(),
     );
   }

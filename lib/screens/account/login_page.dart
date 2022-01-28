@@ -34,135 +34,154 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        leading: GestureDetector(
-          onTap: () {
-            Navigator.pop(context);
-          },
-          child: Container(
-            padding: EdgeInsets.only(left: 25),
-            child: Icon(
-              Icons.arrow_back_ios,
-              color: Colors.black,
-            ),
-          ),
-        ),
-        title: AppText(
-          text: 'Login',
-          fontWeight: FontWeight.bold,
-          fontSize: 20,
-        ),
-      ),
+      // appBar: AppBar(
+      //   elevation: ,
+      //   automaticallyImplyLeading: false,
+      //   leading: GestureDetector(
+      //     onTap: () {
+      //       Navigator.pop(context);
+      //     },
+      //     child: Container(
+      //       padding: EdgeInsets.only(left: 25),
+      //       child: Icon(
+      //         Icons.arrow_back_ios,
+      //         color: Colors.black,
+      //       ),
+      //     ),
+      //   ),
+      //   title: AppText(
+      //     text: 'Login',
+      //     fontWeight: FontWeight.bold,
+      //     fontSize: 20,
+      //   ),
+      // ),
       body: Padding(
         padding: const EdgeInsets.all(15.0),
         child: _firebaseAuth.currentUser != null
             ? _userInfo()
             : Form(
                 key: _formKey,
-                child: ListView(
-                  children: [
-                    CircleAvatar(
-                      radius: 80.0,
-                      backgroundImage: AssetImage(
-                        'assets/images/logo_me.jpeg',
-                      ),
-                    ),
-                    const SizedBox(height: 20.0),
-                    Input(
-                      controller: _emailController,
-                      hintText: 'الايميل',
-                      padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                      validator: (value) {
-                        // Validation.isEmail(value);
-                      },
-                    ),
-                    const SizedBox(height: 10.0),
-                    Input(
-                      controller: _passwordController,
-                      hintText: 'كلمة المرور',
-                      padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                      // validator: (value) {
-                      //   if (value != null) {
-                      //     if (value.length < 6) {
-                      //       return 'password must be greator than 6 chars';
-                      //     }
-                      //   }
-                      //   return null;
-                      // },
-                    ),
-                    const SizedBox(height: 20.0),
-                    Center(
-                      child: DropdownButton(
-                        isDense: true,
-                        isExpanded: true,
-                        items: ['admin', 'user'].map((item) {
-                          return DropdownMenuItem(
-                            value: item,
-                            child: Text(item),
-                          );
-                        }).toList(),
-                        hint: Text(_role),
-                        onChanged: (val) {
-                          _role = val.toString();
-                          setState(() {});
-                        },
-                      ),
-                    ),
-                    const SizedBox(height: 20.0),
-                    Row(
+                child: Center(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Expanded(
-                          child: Btn(
-                            onPressed: () {},
-                            title: 'Login',
-                          ),
+                        // CircleAvatar(
+                        //   radius: 80.0,
+                        //   backgroundImage: AssetImage(
+                        //     'assets/images/logo_me.jpeg',
+                        //   ),
+                        // ),
+                        AppText(
+                          text: 'تسجيل الدخول',
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20,
                         ),
-                        const SizedBox(width: 10.0),
-                        Expanded(
-                          child: Btn(
-                            onPressed: () {},
-                            title: 'Login',
-                          ),
+                        const SizedBox(height: 20.0),
+                        Input(
+                          controller: _emailController,
+                          hintText: 'الايميل',
+                          padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                          validator: (value) {
+                            // Validation.isEmail(value);
+                          },
+                        ),
+                        const SizedBox(height: 10.0),
+                        Input(
+                          controller: _passwordController,
+                          hintText: 'كلمة المرور',
+                          padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                          // validator: (value) {
+                          //   if (value != null) {
+                          //     if (value.length < 6) {
+                          //       return 'password must be greator than 6 chars';
+                          //     }
+                          //   }
+                          //   return null;
+                          // },
+                        ),
+                        // const SizedBox(height: 20.0),
+                        // Center(
+                        //   child: DropdownButton(
+                        //     isDense: true,
+                        //     isExpanded: true,
+                        //     items: ['admin', 'user'].map((item) {
+                        //       return DropdownMenuItem(
+                        //         value: item,
+                        //         child: Text(item),
+                        //       );
+                        //     }).toList(),
+                        //     hint: Text(_role),
+                        //     onChanged: (val) {
+                        //       _role = val.toString();
+                        //       setState(() {});
+                        //     },
+                        //   ),
+                        // ),
+                        // const SizedBox(height: 20.0),
+                        // Row(
+                        //   children: [
+                        //     Expanded(
+                        //       child: Btn(
+                        //         onPressed: () {},
+                        //         title: 'Login',
+                        //       ),
+                        //     ),
+                        //     const SizedBox(width: 10.0),
+                        //     Expanded(
+                        //       child: Btn(
+                        //         onPressed: () {},
+                        //         title: 'Login',
+                        //       ),
+                        //     ),
+                        //   ],
+                        // ),
+                        const SizedBox(height: 40.0),
+                        Btn(
+                          onPressed: () {
+                            return;
+                            if (_role.isEmpty) {
+                              EasyLoading.showError('Select Your Role');
+                              return;
+                            }
+                            EasyLoading.showProgress(0.3, status: 'loading...');
+                            //
+                            final _firebaseAuth = FirebaseAuth.instance;
+                            _firebaseAuth
+                                .signInWithEmailAndPassword(
+                              email: _emailController.text.trim(),
+                              password: _passwordController.text.trim(),
+                            )
+                                .then((value) {
+                              Toast.success();
+                              Push.to(context, DashboardScreen());
+                            }).catchError((onError) {});
+                            //
+                            if (_firebaseAuth.currentUser != null) {
+                              Toast.success();
+                              debugPrint('_role = $_role');
+                              Push.to(
+                                  context,
+                                  _role == 'user'
+                                      ? DashboardScreen()
+                                      : DashboardDdminPage());
+                            } else {
+                              EasyLoading.showError('Login Failed with Error');
+                            }
+                          },
+                          title: 'تسجيل دخول',
+                        ),
+                        Btn(
+                          color: Colors.white,
+                          txtColor: Colors.black,
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          title: 'إنشاء حساب ',
                         ),
                       ],
                     ),
-                    const SizedBox(height: 40.0),
-                    Btn(
-                      color: Colors.grey,
-                      onPressed: () {
-                        if (_role.isEmpty) {
-                          EasyLoading.showError('Select Your Role');
-                          return;
-                        }
-                        EasyLoading.showProgress(0.3, status: 'loading...');
-                        //
-                        final _firebaseAuth = FirebaseAuth.instance;
-                        _firebaseAuth
-                            .signInWithEmailAndPassword(
-                          email: _emailController.text.trim(),
-                          password: _passwordController.text.trim(),
-                        )
-                            .then((value) {
-                          Toast.success();
-                          Push.to(context, DashboardScreen());
-                        }).catchError((onError) {});
-                        //
-                        if (_firebaseAuth.currentUser != null) {
-                          Toast.success();
-                          debugPrint('_role = $_role');
-                          Push.to(
-                              context,
-                              _role == 'user'
-                                  ? DashboardScreen()
-                                  : DashboardDdminPage());
-                        } else {
-                          EasyLoading.showError('Login Failed with Error');
-                        }
-                      },
-                      title: 'Login',
-                    ),
-                  ],
+                  ),
                 ),
               ),
       ),

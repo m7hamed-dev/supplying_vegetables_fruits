@@ -1,14 +1,23 @@
 import 'package:flutter/material.dart';
 
 class Btn extends StatelessWidget {
-  const Btn({Key? key, this.onPressed, this.title, this.color})
-      : super(key: key);
+  const Btn({
+    Key? key,
+    this.onPressed,
+    this.title,
+    this.color,
+    this.txtColor,
+  }) : super(key: key);
+  //
   final void Function()? onPressed;
   final String? title;
   final Color? color;
+  final Color? txtColor;
+  //
   @override
   Widget build(BuildContext context) {
     return Container(
+      width: double.infinity,
       child: MaterialButton(
         color: color ?? Colors.green,
         shape: RoundedRectangleBorder(
@@ -18,7 +27,7 @@ class Btn extends StatelessWidget {
         child: Text(
           title ?? 'title',
           style: TextStyle(
-            color: Colors.white,
+            color: txtColor ?? Colors.white,
             fontFamily: 'cairo-bold',
           ),
         ),

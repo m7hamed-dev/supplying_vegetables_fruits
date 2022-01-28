@@ -1,12 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:grocery_app/common_widgets/app_button.dart';
 import 'package:grocery_app/common_widgets/app_text.dart';
+import 'package:grocery_app/screens/account/register_acount_page.dart';
 import 'package:grocery_app/screens/dashboard/dashboard_screen.dart';
 import 'package:grocery_app/styles/colors.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-class WelcomeScreen extends StatelessWidget {
+class WelcomeScreen extends StatefulWidget {
+  @override
+  State<WelcomeScreen> createState() => _WelcomeScreenState();
+}
+
+class _WelcomeScreenState extends State<WelcomeScreen> {
   final String imagePath = "assets/images/welcome_image.png";
+  @override
+  void initState() {
+    super.initState();
+    _afterToSecondsGoToNextPage();
+  }
+
+  void _afterToSecondsGoToNextPage() async {
+    await Future.delayed(Duration(seconds: 3));
+    onGetStartedClicked(context);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,14 +49,6 @@ class WelcomeScreen extends StatelessWidget {
                 SizedBox(
                   height: 10,
                 ),
-                sloganText(),
-                SizedBox(
-                  height: 40,
-                ),
-                getButton(context),
-                SizedBox(
-                  height: 40,
-                )
               ],
             ),
           ),
@@ -62,12 +70,12 @@ class WelcomeScreen extends StatelessWidget {
         AppText(
           text: "Welcome",
           fontSize: 48,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.bold,
           color: Colors.white,
         ),
         AppText(
           text: "to our store",
-          fontSize: 48,
+          fontSize: 20,
           fontWeight: FontWeight.w600,
           color: Colors.white,
         ),
@@ -84,21 +92,11 @@ class WelcomeScreen extends StatelessWidget {
     );
   }
 
-  Widget getButton(BuildContext context) {
-    return AppButton(
-      label: "Get Started",
-      fontWeight: FontWeight.w600,
-      padding: EdgeInsets.symmetric(vertical: 25),
-      onPressed: () {
-        onGetStartedClicked(context);
-      },
-    );
-  }
-
+  // Widget getButton(BuildContext context) {
   void onGetStartedClicked(BuildContext context) {
-    Navigator.of(context).pushReplacement(new MaterialPageRoute(
+    Navigator.of(context).pushReplacement(MaterialPageRoute(
       builder: (BuildContext context) {
-        return DashboardScreen();
+        return RegisterAccountPage();
       },
     ));
   }
